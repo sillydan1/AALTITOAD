@@ -27,6 +27,7 @@ include_directories(
         src
 )
 
+
 set (CMAKE_CXX_STANDARD 17)
 set (SPDLOG_BUILD_SHARED)
 set (CMAKE_CXX_STANDARD_LIBRARIES -lstdc++fs)
