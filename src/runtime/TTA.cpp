@@ -95,19 +95,19 @@ std::size_t TTA::GetCurrentStateHash() const {
         auto symbol_hash = std::hash<std::string>{}(symbol.first);
         // Combine with the symbol value
         switch(symbol.second->type) {
-            case tokType::INT:
+            case tokType_INT:
                 hash_combine(symbol_hash, symbol.second.asInt());
                 break;
-            case tokType::BOOL:
+            case tokType_BOOL:
                 hash_combine(symbol_hash, symbol.second.asBool());
                 break;
-            case tokType::REAL:
+            case tokType_REAL:
                 hash_combine(symbol_hash, symbol.second.asDouble());
                 break;
-            case tokType::STR:
+            case tokType_STR:
                 hash_combine(symbol_hash, symbol.second.asString());
                 break;
-            case tokType::TIMER:
+            case tokType_TIMER:
                 hash_combine(symbol_hash, symbol.second.asDouble());
                 break;
             default:
@@ -176,7 +176,7 @@ bool TTA::TypeCheck(const std::pair<const std::string, packToken>& symbol,
     if(changingSymbol == symbols.map().end()) {
         spdlog::critical("Attempted to change the state of TTA failed. Symbol '{0}' does not exist.", symbol.first);
         return false;
-    } else if(!(tokType::NUM & x & y) && !(x == tokType::VAR && (tokType::NUM & y))) {
+    } else if(!(tokType_NUM & x & y) && !(x == tokType_VAR && (tokType_NUM & y))) {
         auto a = tokenTypeToString(changingSymbol->second->type);
         auto b = tokenTypeToString(symbol.second->type);
         spdlog::critical(
@@ -217,7 +217,7 @@ void TTA::WarnAboutComponentOverlap(
 TokenMap TTA::GetSymbolChangesAsMap(std::vector<UpdateExpression>& symbolChanges) const {
     SymbolMap symbolsCopy{};
     for(auto& symbolChange : symbolChanges) {
-        if(symbols.map()[symbolChange.lhs]->type == tokType::TIMER)
+        if(symbols.map()[symbolChange.lhs]->type == tokType_TIMER)
             symbolsCopy[symbolChange.lhs] = packToken(symbolChange.Evaluate(symbols).asDouble(), PACK_IS_TIMER);
         else
             symbolsCopy[symbolChange.lhs] = symbolChange.Evaluate(symbols);
@@ -373,7 +373,7 @@ TTA::Edge& TTA::PickEdge(std::vector<TTA::Edge>& edges, const nondeterminism_str
 
 void TTA::DelayAllTimers(double delayDelta) {
     for(auto& symbol : symbols.map()) {
-        if(symbol.second->type == tokType::TIMER)
+        if(symbol.second->type == tokType_TIMER)
             symbols[symbol.first] = packToken(static_cast<double>(symbol.second.asDouble() + delayDelta),
                                               PACK_IS_TIMER);
     }
@@ -381,14 +381,14 @@ void TTA::DelayAllTimers(double delayDelta) {
 
 [[maybe_unused]] void TTA::SetAllTimers(double exactTime) {
     for(auto& symbol : symbols.map()) {
-        if(symbol.second->type == tokType::TIMER)
+        if(symbol.second->type == tokType_TIMER)
             symbols[symbol.first] = packToken(exactTime, PACK_IS_TIMER);
     }
 }
 
 void TTA::StateChange::DelayTimerSymbols(SymbolMap& symbols, float delayDelta) {
     for(auto& symbol : symbols.map()) {
-        if(symbol.second->type == tokType::TIMER)
+        if(symbol.second->type == tokType_TIMER)
             symbols[symbol.first] = packToken(static_cast<double>(symbol.second.asDouble() + delayDelta),
                                               PACK_IS_TIMER);
     }
