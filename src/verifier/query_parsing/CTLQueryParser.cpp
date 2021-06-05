@@ -64,3 +64,8 @@ Query* CTLQueryParser::ParseQueryFromDoc(const rapidjson::Document::ValueType& d
     if(!q) spdlog::error("Query '{0}' is not a proper query!", queryString);
     return q;
 }
+
+bool CTLQueryParser::IsQueryInvertedReachability(const Query &query) {
+    return query.root.type == NodeType_t::Forall
+        && query.children.begin()->root.type == NodeType_t::Globally;
+}

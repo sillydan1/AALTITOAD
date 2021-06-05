@@ -65,13 +65,13 @@ bool IsQuerySatisfiedHelper(const Query& query, const TTA& state) {
 }
 
 bool ReachabilitySearcher::IsQuerySatisfied(const Query& query, const TTA &state) {
-    if(query.root.type == NodeType_t::Forall && query.children.begin()->root.type == NodeType_t::Globally) {
+    if(CTLQueryParser::IsQueryInvertedReachability(query)) {
         auto invertedQ = Query(ASTNode{NodeType_t::Negation, "!"});
         invertedQ.insert(query);
         return IsQuerySatisfiedHelper(invertedQ, state);
     }
     if(query.root.type != NodeType_t::Exists) {
-        spdlog::critical("Only reachability queries are supported right now, sorry.");
+        spdlog::critical("Only reachability queries are supported at this time.");
         return false;
     }
     return IsQuerySatisfiedHelper(query, state);
@@ -83,30 +83,29 @@ void ReachabilitySearcher::AreQueriesSatisfied(std::vector<QueryResultPair>& que
             query.answer = IsQuerySatisfied(*query.query, state);
             if (query.answer) {
                 query.acceptingStateHash = state.GetCurrentStateHash();
-                auto ss = ConvertASTToString(*query.query);
-                spdlog::info("Query '{0}' is satisfied!", ss);
-                spdlog::debug("Query '{0}' was satisfied in state: \n{1}", ss, state.GetCurrentStateString());
+                auto query_as_string = ConvertASTToString(*query.query);
+                spdlog::info("Query '{0}' is satisfied!", query_as_string);
+                spdlog::debug("Query '{0}' was satisfied in state: \n{1}", query_as_string, state.GetCurrentStateString());
             }
         }
     }
 }
 
 void ReachabilitySearcher::OutputResults(const std::vector<QueryResultPair>& results) {
-    if(CLIConfig::getInstance()["output"]) {
-        std::ofstream outputFile{CLIConfig::getInstance()["output"].as_string(), std::ofstream::trunc};
-        for(auto& r : results) {
-            outputFile << ConvertASTToString(*r.query) << " : " << r.answer << "\n";
-        }
-    }
+    if(!CLIConfig::getInstance()["output"])
+        return;
+    std::ofstream outputFile{CLIConfig::getInstance()["output"].as_string(), std::ofstream::trunc};
+    for(auto& result : results)
+        outputFile << ConvertASTToString(*result.query) << " : " << result.answer << "\n";
 }
 
 void ReachabilitySearcher::PrintResults(const std::vector<QueryResultPair>& results) {
     OutputResults(results);
     spdlog::info("==== QUERY RESULTS ====");
-    for(auto& r : results) {
+    for(auto& result : results) {
         spdlog::info("===================="); // Delimiter to make it easier to read
-        spdlog::info("{0} : {1}", ConvertASTToString(*r.query), r.answer);
-        auto stateHash = r.acceptingStateHash;
+        spdlog::info("{0} : {1}", ConvertASTToString(*result.query), result.answer);
+        auto stateHash = result.acceptingStateHash;
         std::vector<std::string> trace{};
         while(stateHash != 0) {
             auto prevState = Passed.find(stateHash);

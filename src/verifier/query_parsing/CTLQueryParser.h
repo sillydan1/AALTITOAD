@@ -29,6 +29,7 @@ using Query = Tree<ASTNode>;
 class CTLQueryParser {
 public:
     static std::vector<const Query*> ParseQueriesFile(const std::string& filepath, const TTA& tta);
+    static bool IsQueryInvertedReachability(const Query& query);
 
 private:
     static Query* ParseQueryFromDoc(const rapidjson::Document::ValueType& document, const TTA& tta);

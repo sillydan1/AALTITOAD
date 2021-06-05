@@ -50,27 +50,27 @@ packToken UpdateExpression::Evaluate(const TokenMap& map) const {
     auto xx = map.find(lhs)->token()->type;
     // TODO: Figure this out... if(val->type != xx) spdlog::warn("This is annoying, but I am out of time");
     switch (xx) {
-        case tokType_INT: return val.asInt();
-        case tokType_REAL: return val.asDouble();
-        case tokType_STR: return val.asString();
-        case tokType_BOOL: return val.asBool();
-        case tokType_VAR: {
+        case tokType::INT: return val.asInt();
+        case tokType::REAL: return val.asDouble();
+        case tokType::STR: return val.asString();
+        case tokType::BOOL: return val.asBool();
+        case tokType::VAR: {
             return val.asBool(); // TODO: This is not right, right?
         }
-        case tokType_TIMER:
+        case tokType::TIMER:
             return packToken(val.asDouble(), PACK_IS_TIMER);
-        case tokType_NUM: // We do not support just "numbers" in general. You need to have an actual type.
-        case tokType_FUNC:
-        case tokType_IT:
-        case tokType_LIST:
-        case tokType_TUPLE:
-        case tokType_STUPLE:
-        case tokType_MAP:
-        case tokType_REF:
-        case tokType_ANY_TYPE:
-        case tokType_NONE:
-        case tokType_OP:
-        case tokType_UNARY:
+        case tokType::NUM: // We do not support just "numbers" in general. You need to have an actual type.
+        case tokType::FUNC:
+        case tokType::IT:
+        case tokType::LIST:
+        case tokType::TUPLE:
+        case tokType::STUPLE:
+        case tokType::MAP:
+        case tokType::REF:
+        case tokType::ANY_TYPE:
+        case tokType::NONE:
+        case tokType::OP:
+        case tokType::UNARY:
         default: throw std::logic_error("Evaluating something we cant evaluate");
     }
 }
